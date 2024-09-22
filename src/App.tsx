@@ -30,6 +30,7 @@ const Grid: React.FC<{
     isBlueMode: boolean;
     fallingColor: string;
     risingColor: string;
+    onExport: (exportFunc: () => void) => void;
 }> = React.memo(
     ({
         grid,
@@ -39,6 +40,7 @@ const Grid: React.FC<{
         isBlueMode,
         fallingColor,
         risingColor,
+        onExport,
     }) => {
         const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -152,6 +154,34 @@ const Grid: React.FC<{
             },
             [activateCell]
         );
+
+        const exportAsPNG = useCallback(() => {
+            const canvas = canvasRef.current;
+            if (canvas) {
+                // Create a temporary canvas with white background
+                const tempCanvas = document.createElement("canvas");
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext("2d");
+                if (tempCtx) {
+                    tempCtx.fillStyle = "white";
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    tempCtx.drawImage(canvas, 0, 0);
+
+                    // Convert to PNG and download
+                    const dataUrl = tempCanvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.download = `falling-sand-simulation-${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                }
+            }
+        }, []);
+
+        // Use useEffect to set the export function only once
+        useEffect(() => {
+            onExport(exportAsPNG);
+        }, [onExport, exportAsPNG]);
 
         return (
             <canvas
@@ -321,6 +351,7 @@ function App() {
     const [fallingColor, setFallingColor] = useState("#FFA500"); // Orange
     const [risingColor, setRisingColor] = useState("#4169E1"); // Royal Blue
     const [isFAQOpen, setIsFAQOpen] = useState(false);
+    const [exportFunction, setExportFunction] = useState<() => void>(() => {});
 
     const initGrid = () => {
         const newParticles: Particle[] = [];
@@ -390,6 +421,8 @@ function App() {
         return () => clearInterval(intervalId);
     }, [intervalRate]);
 
+    // console.log(gridState);
+
     return (
         <div
             style={{
@@ -425,6 +458,7 @@ function App() {
                         isBlueMode={isBlueMode}
                         fallingColor={fallingColor}
                         risingColor={risingColor}
+                        onExport={setExportFunction}
                     />
                 </div>
             </div>
@@ -618,6 +652,25 @@ function App() {
                     }}
                 >
                     Clear Board
+                </button>
+                <button
+                    onClick={exportFunction}
+                    style={{
+                        padding: "12px 24px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#ffffff",
+                        backgroundColor: "#4CAF50",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                        boxShadow:
+                            "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                    }}
+                >
+                    Export as PNG
                 </button>
                 <button
                     onClick={() => setIsFAQOpen(true)}
