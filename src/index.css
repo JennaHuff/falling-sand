@@ -3,6 +3,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -11,11 +12,32 @@ body {
         "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #f0f0f0;
 }
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-        monospace;
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.controls-container {
+    width: 300px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 input[type="range"] {
@@ -49,4 +71,40 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 50%;
     background: #4a90e2;
     cursor: pointer;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #4a90e2;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .canvas-container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .controls-container {
+        width: 100%;
+        box-shadow: none;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
 }

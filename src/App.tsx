@@ -43,6 +43,7 @@ const Grid: React.FC<{
         onExport,
     }) => {
         const canvasRef = useRef<HTMLCanvasElement>(null);
+        const [isDrawing, setIsDrawing] = useState(false);
 
         const drawGrid = useCallback(() => {
             const canvas = canvasRef.current;
@@ -141,18 +142,55 @@ const Grid: React.FC<{
             [setFallingCubes, brushSize, isBlueMode, fallingColor, risingColor]
         );
 
-        const handleMouseMove = useCallback(
-            (e: React.MouseEvent<HTMLCanvasElement>) => {
-                if (e.buttons === 1) {
-                    const rect = canvasRef.current?.getBoundingClientRect();
-                    if (rect) {
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        activateCell(x, y);
-                    }
-                }
+        const handleStart = useCallback(
+            (x: number, y: number) => {
+                setIsDrawing(true);
+                activateCell(x, y);
             },
             [activateCell]
+        );
+
+        const handleMove = useCallback(
+            (x: number, y: number) => {
+                if (isDrawing) {
+                    activateCell(x, y);
+                }
+            },
+            [isDrawing, activateCell]
+        );
+
+        const handleEnd = useCallback(() => {
+            setIsDrawing(false);
+        }, []);
+
+        const handleMouseEvents = useCallback(
+            (e: React.MouseEvent<HTMLCanvasElement>) => {
+                const rect = canvasRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    if (e.type === "mousedown") handleStart(x, y);
+                    else if (e.type === "mousemove") handleMove(x, y);
+                    else if (e.type === "mouseup" || e.type === "mouseleave")
+                        handleEnd();
+                }
+            },
+            [handleStart, handleMove, handleEnd]
+        );
+
+        const handleTouchEvents = useCallback(
+            (e: React.TouchEvent<HTMLCanvasElement>) => {
+                e.preventDefault(); // Prevent scrolling when touching the canvas
+                const rect = canvasRef.current?.getBoundingClientRect();
+                if (rect && e.touches[0]) {
+                    const x = e.touches[0].clientX - rect.left;
+                    const y = e.touches[0].clientY - rect.top;
+                    if (e.type === "touchstart") handleStart(x, y);
+                    else if (e.type === "touchmove") handleMove(x, y);
+                    else if (e.type === "touchend") handleEnd();
+                }
+            },
+            [handleStart, handleMove, handleEnd]
         );
 
         const exportAsPNG = useCallback(() => {
@@ -193,9 +231,15 @@ const Grid: React.FC<{
                     boxShadow:
                         "0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.2)",
                     backgroundColor: "#ffffff",
+                    touchAction: "none", // Prevents default touch actions like scrolling
                 }}
-                onMouseMove={handleMouseMove}
-                onMouseDown={handleMouseMove}
+                onMouseDown={handleMouseEvents}
+                onMouseMove={handleMouseEvents}
+                onMouseUp={handleMouseEvents}
+                onMouseLeave={handleMouseEvents}
+                onTouchStart={handleTouchEvents}
+                onTouchMove={handleTouchEvents}
+                onTouchEnd={handleTouchEvents}
             />
         );
     }
@@ -426,25 +470,8 @@ function App() {
     // console.log(gridState);
 
     return (
-        <div
-            style={{
-                display: "flex",
-                height: "100vh",
-                width: "100%",
-                backgroundColor: "#f0f0f0",
-                fontFamily:
-                    "'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-            }}
-        >
-            <div
-                style={{
-                    flex: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: "20px",
-                }}
-            >
+        <div className="app-container">
+            <div className="canvas-container">
                 <div
                     style={{
                         width: "100%",
@@ -464,18 +491,7 @@ function App() {
                     />
                 </div>
             </div>
-            <div
-                style={{
-                    width: "300px",
-                    padding: "20px",
-                    backgroundColor: "#ffffff",
-                    boxShadow: "-5px 0 15px rgba(0, 0, 0, 0.1)",
-                    overflowY: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                }}
-            >
+            <div className="controls-container">
                 <div
                     style={{
                         display: "flex",
