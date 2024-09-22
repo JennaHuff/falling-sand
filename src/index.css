@@ -50,3 +50,20 @@ input[type="range"]::-moz-range-thumb {
     background: #4a90e2;
     cursor: pointer;
 }
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb,
+    input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+}

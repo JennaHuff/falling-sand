@@ -141,16 +141,25 @@ const Grid: React.FC<{
             [setFallingCubes, brushSize, isBlueMode, fallingColor, risingColor]
         );
 
-        const handleMouseMove = useCallback(
-            (e: React.MouseEvent<HTMLCanvasElement>) => {
-                if (e.buttons === 1) {
-                    const rect = canvasRef.current?.getBoundingClientRect();
-                    if (rect) {
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        activateCell(x, y);
-                    }
-                }
+        const handleInteraction = useCallback(
+            (
+                e:
+                    | React.TouchEvent<HTMLCanvasElement>
+                    | React.MouseEvent<HTMLCanvasElement>
+            ) => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x =
+                    "touches" in e
+                        ? e.touches[0].clientX - rect.left
+                        : e.clientX - rect.left;
+                const y =
+                    "touches" in e
+                        ? e.touches[0].clientY - rect.top
+                        : e.clientY - rect.top;
+                activateCell(x, y);
             },
             [activateCell]
         );
@@ -193,9 +202,12 @@ const Grid: React.FC<{
                     boxShadow:
                         "0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.2)",
                     backgroundColor: "#ffffff",
+                    touchAction: "none",
                 }}
-                onMouseMove={handleMouseMove}
-                onMouseDown={handleMouseMove}
+                onMouseMove={handleInteraction}
+                onMouseDown={handleInteraction}
+                onTouchMove={handleInteraction}
+                onTouchStart={handleInteraction}
             />
         );
     }
@@ -427,6 +439,7 @@ function App() {
         <div
             style={{
                 display: "flex",
+                flexDirection: "column",
                 height: "100vh",
                 width: "100%",
                 backgroundColor: "#f0f0f0",
@@ -438,9 +451,11 @@ function App() {
                 style={{
                     flex: 1,
                     display: "flex",
-                    justifyContent: "center",
+                    flexDirection: "column",
                     alignItems: "center",
                     padding: "20px",
+                    gap: "20px",
+                    overflowY: "auto",
                 }}
             >
                 <div
@@ -461,236 +476,240 @@ function App() {
                         onExport={setExportFunction}
                     />
                 </div>
-            </div>
-            <div
-                style={{
-                    width: "300px",
-                    padding: "20px",
-                    backgroundColor: "#ffffff",
-                    boxShadow: "-5px 0 15px rgba(0, 0, 0, 0.1)",
-                    overflowY: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                }}
-            >
                 <div
                     style={{
+                        width: "100%",
+                        maxWidth: "300px",
+                        padding: "20px",
+                        backgroundColor: "#ffffff",
+                        borderRadius: "12px",
+                        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.1)",
                         display: "flex",
                         flexDirection: "column",
-                        alignItems: "stretch",
-                        marginBottom: "20px",
+                        gap: "20px",
                     }}
                 >
-                    <label
-                        htmlFor="brushSize"
+                    <div
                         style={{
-                            marginBottom: "5px",
-                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                            fontSize: "14px",
-                            color: "#333",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "stretch",
+                            marginBottom: "20px",
                         }}
                     >
-                        Brush Size: {brushSize}
-                    </label>
-                    <input
-                        type="range"
-                        id="brushSize"
-                        min="1"
-                        max="20"
-                        value={brushSize}
-                        onChange={(e) => setBrushSize(Number(e.target.value))}
+                        <label
+                            htmlFor="brushSize"
+                            style={{
+                                marginBottom: "5px",
+                                fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                                fontSize: "14px",
+                                color: "#333",
+                            }}
+                        >
+                            Brush Size: {brushSize}
+                        </label>
+                        <input
+                            type="range"
+                            id="brushSize"
+                            min="1"
+                            max="20"
+                            value={brushSize}
+                            onChange={(e) =>
+                                setBrushSize(Number(e.target.value))
+                            }
+                            style={{
+                                width: "100%",
+                                accentColor: "#4a90e2",
+                            }}
+                        />
+                    </div>
+                    <div
                         style={{
-                            width: "100%",
-                            accentColor: "#4a90e2",
-                        }}
-                    />
-                </div>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "stretch",
-                        marginBottom: "20px",
-                    }}
-                >
-                    <label
-                        htmlFor="intervalRate"
-                        style={{
-                            marginBottom: "5px",
-                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                            fontSize: "14px",
-                            color: "#333",
-                        }}
-                    >
-                        Update Interval: {intervalRate}ms
-                    </label>
-                    <input
-                        type="range"
-                        id="intervalRate"
-                        min="1"
-                        max="100"
-                        value={intervalRate}
-                        onChange={(e) =>
-                            setIntervalRate(Number(e.target.value))
-                        }
-                        style={{
-                            width: "100%",
-                            accentColor: "#4a90e2",
-                        }}
-                    />
-                </div>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "stretch",
-                        marginBottom: "20px",
-                    }}
-                >
-                    <label
-                        htmlFor="fallingColor"
-                        style={{
-                            marginBottom: "5px",
-                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                            fontSize: "14px",
-                            color: "#333",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "stretch",
+                            marginBottom: "20px",
                         }}
                     >
-                        Falling Particle Color:
-                    </label>
-                    <input
-                        type="color"
-                        id="fallingColor"
-                        value={fallingColor}
-                        onChange={(e) => setFallingColor(e.target.value)}
+                        <label
+                            htmlFor="intervalRate"
+                            style={{
+                                marginBottom: "5px",
+                                fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                                fontSize: "14px",
+                                color: "#333",
+                            }}
+                        >
+                            Update Interval: {intervalRate}ms
+                        </label>
+                        <input
+                            type="range"
+                            id="intervalRate"
+                            min="1"
+                            max="100"
+                            value={intervalRate}
+                            onChange={(e) =>
+                                setIntervalRate(Number(e.target.value))
+                            }
+                            style={{
+                                width: "100%",
+                                accentColor: "#4a90e2",
+                            }}
+                        />
+                    </div>
+                    <div
                         style={{
-                            width: "100%",
-                            height: "40px",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "stretch",
+                            marginBottom: "20px",
+                        }}
+                    >
+                        <label
+                            htmlFor="fallingColor"
+                            style={{
+                                marginBottom: "5px",
+                                fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                                fontSize: "14px",
+                                color: "#333",
+                            }}
+                        >
+                            Falling Particle Color:
+                        </label>
+                        <input
+                            type="color"
+                            id="fallingColor"
+                            value={fallingColor}
+                            onChange={(e) => setFallingColor(e.target.value)}
+                            style={{
+                                width: "100%",
+                                height: "40px",
+                                border: "none",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                            }}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "stretch",
+                            marginBottom: "20px",
+                        }}
+                    >
+                        <label
+                            htmlFor="risingColor"
+                            style={{
+                                marginBottom: "5px",
+                                fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                                fontSize: "14px",
+                                color: "#333",
+                            }}
+                        >
+                            Rising Particle Color:
+                        </label>
+                        <input
+                            type="color"
+                            id="risingColor"
+                            value={risingColor}
+                            onChange={(e) => setRisingColor(e.target.value)}
+                            style={{
+                                width: "100%",
+                                height: "40px",
+                                border: "none",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                            }}
+                        />
+                    </div>
+                    <button
+                        onClick={() => setIsBlueMode(!isBlueMode)}
+                        style={{
+                            padding: "12px 24px",
+                            fontSize: "16px",
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                            backgroundColor: isBlueMode ? "#4a90e2" : "#e29a4a",
                             border: "none",
                             borderRadius: "8px",
                             cursor: "pointer",
-                        }}
-                    />
-                </div>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "stretch",
-                        marginBottom: "20px",
-                    }}
-                >
-                    <label
-                        htmlFor="risingColor"
-                        style={{
-                            marginBottom: "5px",
+                            transition: "all 0.3s ease",
+                            boxShadow:
+                                "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
                             fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                            fontSize: "14px",
-                            color: "#333",
+                            marginBottom: "10px",
                         }}
                     >
-                        Rising Particle Color:
-                    </label>
-                    <input
-                        type="color"
-                        id="risingColor"
-                        value={risingColor}
-                        onChange={(e) => setRisingColor(e.target.value)}
+                        Fall direction: {isBlueMode ? "↑" : "↓"}
+                    </button>
+                    <button
+                        onClick={initGrid}
                         style={{
-                            width: "100%",
-                            height: "40px",
+                            padding: "12px 24px",
+                            fontSize: "16px",
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                            backgroundColor: "#4a90e2",
                             border: "none",
                             borderRadius: "8px",
                             cursor: "pointer",
+                            transition: "all 0.3s ease",
+                            boxShadow:
+                                "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
                         }}
-                    />
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#357ae8";
+                            e.currentTarget.style.transform =
+                                "translateY(-1px)";
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "#4a90e2";
+                            e.currentTarget.style.transform = "translateY(0)";
+                        }}
+                    >
+                        Clear Board
+                    </button>
+                    <button
+                        onClick={exportFunction}
+                        style={{
+                            padding: "12px 24px",
+                            fontSize: "16px",
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                            backgroundColor: "#4CAF50",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            transition: "all 0.3s ease",
+                            boxShadow:
+                                "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                        }}
+                    >
+                        Export as PNG
+                    </button>
+                    <button
+                        onClick={() => setIsFAQOpen(true)}
+                        style={{
+                            padding: "12px 24px",
+                            fontSize: "16px",
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                            backgroundColor: "#e24a4a",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            transition: "all 0.3s ease",
+                            boxShadow:
+                                "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                        }}
+                    >
+                        ? Show Help
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsBlueMode(!isBlueMode)}
-                    style={{
-                        padding: "12px 24px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        backgroundColor: isBlueMode ? "#4a90e2" : "#e29a4a",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        boxShadow:
-                            "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
-                        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                        marginBottom: "10px",
-                    }}
-                >
-                    Fall direction: {isBlueMode ? "↑" : "↓"}
-                </button>
-                <button
-                    onClick={initGrid}
-                    style={{
-                        padding: "12px 24px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        backgroundColor: "#4a90e2",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        boxShadow:
-                            "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
-                        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                    }}
-                    onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = "#357ae8";
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                    }}
-                    onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = "#4a90e2";
-                        e.currentTarget.style.transform = "translateY(0)";
-                    }}
-                >
-                    Clear Board
-                </button>
-                <button
-                    onClick={exportFunction}
-                    style={{
-                        padding: "12px 24px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        backgroundColor: "#4CAF50",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        boxShadow:
-                            "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
-                        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                    }}
-                >
-                    Export as PNG
-                </button>
-                <button
-                    onClick={() => setIsFAQOpen(true)}
-                    style={{
-                        padding: "12px 24px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        backgroundColor: "#e24a4a",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        boxShadow:
-                            "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
-                        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                    }}
-                >
-                    ? Show Help
-                </button>
             </div>
             <FAQModal isOpen={isFAQOpen} onClose={() => setIsFAQOpen(false)} />
         </div>
