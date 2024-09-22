@@ -180,7 +180,7 @@ const Grid: React.FC<{
 
         // Use useEffect to set the export function only once
         useEffect(() => {
-            onExport(exportAsPNG);
+            onExport(() => exportAsPNG);
         }, [onExport, exportAsPNG]);
 
         return (
@@ -351,7 +351,9 @@ function App() {
     const [fallingColor, setFallingColor] = useState("#FFA500"); // Orange
     const [risingColor, setRisingColor] = useState("#4169E1"); // Royal Blue
     const [isFAQOpen, setIsFAQOpen] = useState(false);
-    const [exportFunction, setExportFunction] = useState<() => void>(() => {});
+    const [exportFunction, setExportFunction] = useState<(() => void) | null>(
+        null
+    );
 
     const initGrid = () => {
         const newParticles: Particle[] = [];
@@ -654,7 +656,7 @@ function App() {
                     Clear Board
                 </button>
                 <button
-                    onClick={exportFunction}
+                    onClick={() => exportFunction && exportFunction()}
                     style={{
                         padding: "12px 24px",
                         fontSize: "16px",
