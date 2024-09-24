@@ -311,33 +311,16 @@ const FAQModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                             lineHeight: 1.6,
                         }}
                     >
-                        This is a falling sand simulator, inspired by various
-                        cellular automata projects.
-                    </dd>
-
-                    <dt
-                        style={{
-                            fontWeight: 600,
-                            color: "#4a90e2",
-                            marginBottom: "5px",
-                            fontSize: "18px",
-                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-                        }}
-                    >
-                        How does it work?
-                    </dt>
-                    <dd
-                        style={{
-                            marginBottom: "15px",
-                            paddingLeft: "20px",
-                            fontSize: "16px",
-                            lineHeight: 1.6,
-                        }}
-                    >
-                        The simulator uses a grid where each cell can contain
-                        different types of particles. These particles interact
-                        with each other based on simple rules, creating complex
-                        behaviors.
+                        {`This is a falling sand simulator, the idea comes from `}
+                        <a
+                            href="https://youtu.be/L4u7Zy_b868?feature=shared"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            The Coding Train's challenge video
+                        </a>
+                        {`.
+                        I was helped by the claude-sonnet-3.5 AI model to greatly improve performance and to generate the repetitive and easy-to-test parts of the code.`}
                     </dd>
 
                     <dt
@@ -359,8 +342,30 @@ const FAQModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                             lineHeight: 1.6,
                         }}
                     >
-                        Yes! You can click and drag on the grid to add
-                        particles. Try different types to see how they interact.
+                        {`Yes! You can click and drag on the grid to add
+                        particles. Play with the setting to create different shapes (try collisions between up and down-falling particles!). Better performance is usually encountered on Chrome than Firefox.`}
+                    </dd>
+
+                    <dt
+                        style={{
+                            fontWeight: 600,
+                            color: "#4a90e2",
+                            marginBottom: "5px",
+                            fontSize: "18px",
+                            fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                        }}
+                    >
+                        How does it work?
+                    </dt>
+                    <dd
+                        style={{
+                            marginBottom: "15px",
+                            paddingLeft: "20px",
+                            fontSize: "16px",
+                            lineHeight: 1.6,
+                        }}
+                    >
+                        {`The simulator uses the browser's Canvas API and ReactJS's state feature, the rest are simple 2D array manipulation functions.`}
                     </dd>
                 </dl>
                 <button
@@ -515,7 +520,7 @@ function App() {
                         type="range"
                         id="brushSize"
                         min="1"
-                        max="20"
+                        max="10"
                         value={brushSize}
                         onChange={(e) => setBrushSize(Number(e.target.value))}
                         style={{
